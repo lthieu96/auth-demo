@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { GluestackUIProvider } from '@gluestack-ui/themed';
 import { config } from '@gluestack-ui/config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,11 +47,21 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <GluestackUIProvider config={config}>
+    <Providers>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack>
-    </GluestackUIProvider>
+    </Providers>
+  );
+}
+
+const queryClient = new QueryClient();
+
+function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GluestackUIProvider config={config}>{children}</GluestackUIProvider>
+    </QueryClientProvider>
   );
 }
