@@ -11,37 +11,18 @@ import {
 } from '@gluestack-ui/themed';
 import { Box } from '@gluestack-ui/themed';
 import { useQueryClient } from '@tanstack/react-query';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import { deleteItemAsync } from 'expo-secure-store';
-import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function index() {
-  const { data, isLoading } = useProFile();
+  const { data } = useProFile();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-    if (!data) {
-      router.replace('/login');
-    }
-  }, [data, isLoading]);
-
-  if (isLoading)
-    return (
-      <SafeAreaView className="bg-white">
-        <Box h={'$full'} p={'$6'} justifyContent="center">
-          <Spinner />
-        </Box>
-      </SafeAreaView>
-    );
 
   const handleLogout = async () => {
     await deleteItemAsync(StorageKeys.accessToken);
     await deleteItemAsync(StorageKeys.refreshToken);
-    queryClient.setQueryData(['profile'], null);
+    queryClient.resetQueries();
     router.replace('/login');
   };
 

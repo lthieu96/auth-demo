@@ -25,8 +25,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useGoogleLogin } from '@/api/auth/useGoogleLogin';
 
 GoogleSignin.configure({
-  webClientId:
-    '19611705861-4rr0aubpok1b2edcn0n42apvcc1ntdhi.apps.googleusercontent.com',
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
   scopes: ['email', 'profile'],
 });
 
@@ -58,7 +57,6 @@ export default function login() {
       if (!req.data?.idToken) {
         return;
       }
-      console.log(req.data.idToken);
       googleLogin(
         { token: req.data.idToken },
         {
