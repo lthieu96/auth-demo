@@ -3,9 +3,11 @@ import apiClient from '../common/client';
 import { setItem } from 'expo-secure-store';
 import { StorageKeys } from '@/constants/StorageKeys';
 import { router } from 'expo-router';
-import { useToast } from '@gluestack-ui/themed';
+import { useProFile } from './useProfile';
 
 export const useLogin = () => {
+  const { refetch } = useProFile();
+
   return useMutation({
     mutationFn: async ({
       email,
@@ -26,6 +28,7 @@ export const useLogin = () => {
         setItem(StorageKeys.accessToken, accessToken),
         setItem(StorageKeys.refreshToken, refreshToken),
       ]);
+      await refetch();
       router.replace('/');
     },
   });

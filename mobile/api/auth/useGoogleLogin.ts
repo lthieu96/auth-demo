@@ -3,8 +3,11 @@ import apiClient from '../common/client';
 import { setItem } from 'expo-secure-store';
 import { StorageKeys } from '@/constants/StorageKeys';
 import { router } from 'expo-router';
+import { useProFile } from './useProfile';
 
 export const useGoogleLogin = () => {
+  const { refetch } = useProFile();
+
   return useMutation({
     mutationFn: async ({ token }: { token: string }) =>
       apiClient
@@ -14,7 +17,6 @@ export const useGoogleLogin = () => {
         }>('/auth/google', { token })
         .then((res) => res.data),
     onError: (error) => {
-      console.error(error);
       throw error;
     },
     onSuccess: async (data) => {
@@ -23,6 +25,7 @@ export const useGoogleLogin = () => {
         setItem(StorageKeys.accessToken, accessToken),
         setItem(StorageKeys.refreshToken, refreshToken),
       ]);
+      await refetch();
       router.replace('/');
     },
   });

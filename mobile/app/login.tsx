@@ -21,16 +21,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@/api/auth/useLogin';
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useGoogleLogin } from '@/api/auth/useGoogleLogin';
 
 GoogleSignin.configure({
-  webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+  webClientId:
+    '19611705861-4rr0aubpok1b2edcn0n42apvcc1ntdhi.apps.googleusercontent.com',
+  scopes: ['email', 'profile'],
 });
 
 const loginSchema = z.object({
@@ -56,11 +53,27 @@ export default function login() {
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      const { accessToken } = await GoogleSignin.getTokens();
-      googleLogin({ token: accessToken });
+      await GoogleSignin.signOut();
+      const req = await GoogleSignin.signIn();
+      if (!req.data?.idToken) {
+        return;
+      }
+      console.log(req.data.idToken);
+      googleLogin(
+        { token: req.data.idToken },
+        {
+          onError: (err) => {
+            toast.show({
+              render: () => (
+                <Toast action="error">
+                  <ToastDescription>{err.data.message}</ToastDescription>
+                </Toast>
+              ),
+            });
+          },
+        },
+      );
     } catch (error) {
-      console.log('gg-login-error', error.response);
       toast.show({
         render: () => (
           <Toast>
@@ -103,7 +116,20 @@ export default function login() {
             </VStack>
             <Button
               onPress={form.handleSubmit((val) => {
-                login(val);
+                Keyboard.dismiss();
+                login(val, {
+                  onError: (err) => {
+                    toast.show({
+                      render: () => (
+                        <Toast action="error">
+                          <ToastDescription>
+                            {err.data.message}
+                          </ToastDescription>
+                        </Toast>
+                      ),
+                    });
+                  },
+                });
               })}
             >
               <ButtonText>
