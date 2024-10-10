@@ -10,6 +10,7 @@ import {
   VStack,
 } from '@gluestack-ui/themed';
 import { Box } from '@gluestack-ui/themed';
+import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, router } from 'expo-router';
 import { deleteItemAsync } from 'expo-secure-store';
 import { useEffect } from 'react';
@@ -17,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function index() {
   const { data, isLoading } = useProFile();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isLoading) {
@@ -39,6 +41,7 @@ export default function index() {
   const handleLogout = async () => {
     await deleteItemAsync(StorageKeys.accessToken);
     await deleteItemAsync(StorageKeys.refreshToken);
+    queryClient.setQueryData(['profile'], null);
     router.replace('/login');
   };
 

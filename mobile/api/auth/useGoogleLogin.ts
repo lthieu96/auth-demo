@@ -3,23 +3,20 @@ import apiClient from '../common/client';
 import { setItem } from 'expo-secure-store';
 import { StorageKeys } from '@/constants/StorageKeys';
 import { router } from 'expo-router';
-import { useToast } from '@gluestack-ui/themed';
 
-export const useLogin = () => {
+export const useGoogleLogin = () => {
   return useMutation({
-    mutationFn: async ({
-      email,
-      password,
-    }: {
-      email: string;
-      password: string;
-    }) =>
+    mutationFn: async ({ token }: { token: string }) =>
       apiClient
         .post<{
           accessToken: string;
           refreshToken: string;
-        }>('/auth/sign-in', { email, password })
+        }>('/auth/google', { token })
         .then((res) => res.data),
+    onError: (error) => {
+      console.error(error);
+      throw error;
+    },
     onSuccess: async (data) => {
       const { accessToken, refreshToken } = data;
       await Promise.all([

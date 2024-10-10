@@ -9,6 +9,9 @@ import {
   InputField,
   Spinner,
   Text,
+  Toast,
+  ToastDescription,
+  useToast,
   VStack,
 } from '@gluestack-ui/themed';
 import React from 'react';
@@ -18,6 +21,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@/api/auth/useLogin';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import { useGoogleLogin } from '@/api/auth/useGoogleLogin';
+
+GoogleSignin.configure({
+  webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+});
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -27,7 +41,9 @@ const loginSchema = z.object({
 type LoginData = z.infer<typeof loginSchema>;
 
 export default function login() {
+  const toast = useToast();
   const { mutate: login, isPending: isLoginPending } = useLogin();
+  const { mutate: googleLogin, isPending: isGGLoginPending } = useGoogleLogin();
 
   const form = useForm<LoginData>({
     defaultValues: {
@@ -36,6 +52,24 @@ export default function login() {
     },
     resolver: zodResolver(loginSchema),
   });
+
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      const { accessToken } = await GoogleSignin.getTokens();
+      googleLogin({ token: accessToken });
+    } catch (error) {
+      console.log('gg-login-error', error.response);
+      toast.show({
+        render: () => (
+          <Toast>
+            <ToastDescription>{error.message}</ToastDescription>
+          </Toast>
+        ),
+      });
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -83,8 +117,17 @@ export default function login() {
               <Divider bg="$trueGray200" w={'$16'} />
             </HStack>
 
-            <Button mt="$3" variant="outline" action="secondary">
-              <ButtonText>Login with Google</ButtonText>
+            <Button
+              mt="$3"
+              variant="outline"
+              action="secondary"
+              onPress={handleGoogleLogin}
+            >
+              <HStack space="sm" alignItems="center">
+                <ButtonText>Login with Google</ButtonText>
+
+                {isGGLoginPending ? <Spinner /> : null}
+              </HStack>
             </Button>
           </VStack>
         </Box>

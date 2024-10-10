@@ -9,5 +9,6 @@ export const useProFile = () => {
       const res = await apiClient.get<User>('/auth/profile');
       return res.data;
     },
+    staleTime: 0,
   });
 };
