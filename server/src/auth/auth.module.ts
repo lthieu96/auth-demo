@@ -15,6 +15,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import redisConfig from 'src/config/redis.config';
 import { RefreshTokenIdsStorage } from './storage/refresh-token-ids.storage';
+import { RolesGuard } from 'src/authorization/guards/roles.guard';
+import { GoogleService } from './social/google.service';
+import { GoogleController } from './social/google.controller';
 
 @Module({
   imports: [
@@ -30,7 +33,7 @@ import { RefreshTokenIdsStorage } from './storage/refresh-token-ids.storage';
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, GoogleController],
   providers: [
     AuthService,
     LocalStrategy,
@@ -42,6 +45,8 @@ import { RefreshTokenIdsStorage } from './storage/refresh-token-ids.storage';
       useClass: BcryptService,
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+    GoogleService,
   ],
 })
 export class AuthModule {}
