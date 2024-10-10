@@ -1,4 +1,4 @@
-export type CurrentUserData = {
+export type ActiveUserData = {
   sub: number;
   email: string;
 };

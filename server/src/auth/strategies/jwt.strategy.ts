@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
-import { CurrentUserData } from '../types';
+import { ActiveUserData } from '../types';
 
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(@Inject(jwtConfig.KEY) config: ConfigType<typeof jwtConfig>) {
@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: CurrentUserData) {
+  async validate(payload: ActiveUserData) {
     return payload;
   }
 }

@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HashingService } from './hashing/hashing.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -12,18 +12,31 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import redisConfig from 'src/config/redis.config';
+import { RefreshTokenIdsStorage } from './storage/refresh-token-ids.storage';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
+    RedisModule.forRootAsync({
+      imports: [ConfigModule.forFeature(redisConfig)],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'single',
+        url: `rediss://default:${config.get('redis.password')}@${config.get('redis.host')}:6379`,
+      }),
+    }),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    ConfigService,
+    RefreshTokenIdsStorage,
     {
       provide: HashingService,
       useClass: BcryptService,
