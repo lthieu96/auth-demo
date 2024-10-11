@@ -12,6 +12,6 @@ Tech-stack: React-native, Expo, Axios, ReactQuery,...
 
 1. Triển khai xác thực bằng google ([refer](https://react-native-google-signin.github.io/docs/original))
 
-- Lưu ý: khi cấu hình, Google Client ID (webClientId) phải dùng Google Client ID khi cấu hình cho server (nestjs)
-
 ![gg-auth-flow](./assets/google-auth-sequence.png)
+
+- Lưu ý: khi cấu hình, cả server và frontend phải cấu hình chung Google Client ID thuộc loại web app
